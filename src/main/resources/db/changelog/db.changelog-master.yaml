@@ -1,5 +1,3 @@
 databaseChangeLog:
-  - changeSet:
-      id: 1
-      author: nklimovych
-      changes: []
+  - include:
+      file: db/changelog/changes/create-image-table.yaml
