@@ -5,11 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -18,7 +15,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Getter
@@ -27,8 +23,8 @@ import org.hibernate.annotations.CreationTimestamp;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "images")
-public class Image {
+@Table(name = "labels")
+public class Label {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,17 +32,6 @@ public class Image {
     @Column(nullable = false)
     private String name;
 
-    @CreationTimestamp
-    private LocalDateTime uploadedAt;
-
-    @Column(nullable = false)
-    private String url;
-
-    @ManyToMany //TODO: default FetchType.LAZY
-    @JoinTable(
-            name = "images_labels",
-            joinColumns = @JoinColumn(name = "image_id"),
-            inverseJoinColumns = @JoinColumn(name = "label_id")
-    )
-    private Set<Label> labels = new HashSet<>();
+    @ManyToMany(mappedBy = "labels")
+    private Set<Image> images = new HashSet<>();
 }
