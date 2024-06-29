@@ -42,7 +42,7 @@ public class Image {
     @Column(nullable = false)
     private String url;
 
-    @ManyToMany //TODO: default FetchType.LAZY
+    @ManyToMany
     @JoinTable(
             name = "images_labels",
             joinColumns = @JoinColumn(name = "image_id"),
