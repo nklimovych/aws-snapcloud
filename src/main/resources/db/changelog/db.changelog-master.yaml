@@ -1,5 +1,7 @@
 databaseChangeLog:
-  - changeSet:
-      id: 1
-      author: nklimovych
-      changes: []
+  - include:
+      file: db/changelog/changes/create-images-table.yaml
+  - include:
+      file: db/changelog/changes/create-labels-table.yaml
+  - include:
+      file: db/changelog/changes/create-images-labels-table.yaml

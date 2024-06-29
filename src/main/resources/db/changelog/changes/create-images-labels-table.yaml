@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-images-labels-join-table
+      author: nklimovych
+      changes:
+        - createTable:
+            tableName: images_labels
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: image_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: label_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: images_labels
+            baseColumnNames: image_id
+            referencedTableName: images
+            referencedColumnNames: id
+            constraintName: fk_image_id
+
+        - addForeignKeyConstraint:
+            baseTableName: images_labels
+            baseColumnNames: label_id
+            referencedTableName: labels
+            referencedColumnNames: id
+            constraintName: fk_label_id
