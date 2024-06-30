@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
-    @Query("SELECT DISTINCT i FROM Image i JOIN i.labels l WHERE l.name = :labelName")
+    @Query("SELECT i FROM Image i JOIN i.labels l WHERE l.name = :labelName")
     List<Image> findByLabelName(@Param("labelName") String labelName);
+
+    boolean existsByName(String name);
 }
