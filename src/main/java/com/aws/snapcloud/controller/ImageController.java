@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/images")
+@RequestMapping("/api/images")
 public class ImageController {
     private final ImageService imageService;
 
@@ -25,5 +25,10 @@ public class ImageController {
     @GetMapping("/search")
     public List<String> searchImages(@RequestParam("label") String label) {
         return imageService.searchByLabel(label);
+    }
+
+    @GetMapping("/random")
+    public List<String> getRandomImages() {
+        return imageService.getRandomImageUrls();
     }
 }

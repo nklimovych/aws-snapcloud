@@ -9,7 +9,11 @@ import com.aws.snapcloud.service.ImageService;
 import com.aws.snapcloud.service.RekognitionService;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
+    private static final int INITIATE_IMAGE_COUNT = 38;
+
     private final RekognitionService rekognitionService;
     private final ImageRepository imageRepository;
     private final ImageMapper imageMapper;
@@ -54,8 +60,33 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public List<String> searchByLabel(String label) {
         return imageRepository.findByLabelName(label).stream()
-                .map(Image::getUrl)
-                .toList();
+                              .map(Image::getUrl)
+                              .toList();
+    }
+
+    @Override
+    public List<String> getRandomImageUrls() {
+        List<String> randomUrls = new ArrayList<>();
+        List<Image> images = imageRepository.findAll();
+        int count = INITIATE_IMAGE_COUNT;
+
+        if (images.size() <= count) {
+            return images.stream()
+                         .map(Image::getUrl)
+                         .toList();
+        }
+
+        Random random = new Random();
+        Set<Integer> indexes = new HashSet<>();
+        while (indexes.size() < count) {
+            indexes.add(random.nextInt(images.size()));
+        }
+
+        for (Integer index : indexes) {
+            randomUrls.add(images.get(index).getUrl());
+        }
+
+        return randomUrls;
     }
 
     private Image save(String fileName) {
