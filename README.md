@@ -30,6 +30,10 @@ scenes, and activities in images.
 - **Liquibase**: Database schema management for Java applications.
 - **MySQL**: Relational database management system.
 - **MapStruct**: Code generator for mapping between Java bean types.
+- **JUnit**: Testing framework for Java applications.
+- **Mockito**: Mocking framework for unit tests in Java.
+- **Docker**: Platform for containerizing applications.
+- **Testcontainers**: Library for integration testing with Docker containers.
 
 ## AWS Setup Instructions
 
