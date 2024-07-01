@@ -23,10 +23,10 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "labels")
+@EqualsAndHashCode(exclude = "labels")
 @Table(name = "images")
 public class Image {
     @Id
