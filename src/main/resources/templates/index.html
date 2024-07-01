@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snap Cloud</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          rel="stylesheet">
+    <style>
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+            position: relative;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .image-container img {
+            margin: 10px;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        section.search {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px;
+        }
+
+        .search input.form-control {
+            flex: 1;
+            width: auto;
+        }
+
+        .upload-btn {
+            margin-bottom: 0;
+        }
+
+        footer {
+            width: 100%;
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+        }
+
+        footer .container {
+            display: flex;
+            justify-content: center;
+        }
+
+        a {
+            color: #2A2A2A;
+        }
+
+        a:hover {
+            color: #2A2A2A;
+        }
+
+        h1 {
+            font-family: 'Sometype Mono', monospace;
+            font-weight: 400;
+        }
+
+        .label-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 0 8px;
+            max-height: calc(3 * (35px + 10px));
+            overflow: hidden;
+        }
+
+        .label-cloud span {
+            margin: 5px;
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #uploadNotification {
+            transform: translateY(-45px);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="d-flex justify-content-between align-items-center mt-2">
+        <div class="d-flex align-items-center">
+            <h1 class="ml-3 font-weight-light">SnapCloud</h1>
+            <p class="ml-2 mb-0"> - Capture. Store. Explore.</p>
+        </div>
+    </header>
+
+    <section class="label-cloud" id="labelCloud"></section>
+
+    <section class="search">
+        <form id="searchForm" onsubmit="searchImages(event)"
+              class="d-flex align-items-center flex-grow-1">
+            <input type="text" class="form-control flex-grow-1 mr-2" id="labelInput"
+                   placeholder="Enter your own label" required>
+            <button class="btn btn-outline-dark" type="submit">Search</button>
+        </form>
+        <label for="fileInput" class="upload-btn btn btn-outline-dark ml-2">Upload
+            <input type="file" id="fileInput" name="file" style="display: none;"
+                   onchange="handleFileUpload(this.files)">
+        </label>
+    </section>
+
+    <section>
+        <div id="uploadNotification" class="toast align-items-center text-white bg-success"
+             role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000"
+             style="position: fixed; bottom: 10px; right: 10px; z-index: 1050;">
+            <div class="toast-body">
+                File uploaded successfully
+            </div>
+        </div>
+        <div id="resultContainer" class="image-container rounded"></div>
+    </section>
+</div>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <a id="downloadLink" href="" download>Download</a>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" class="img-fluid" alt="Image">
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="py-3 text-muted">
+    <div class="container">
+        &copy; 2024 SnapCloud&nbsp;|&nbsp; <a
+            href="https://www.linkedin.com/in/klimovych/">LinkedIn </a> / <a
+            href="https://github.com/nklimovych"> GitHub</a>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    let page = 0;
+    let loadingImagesByLabel = false;
+
+    async function loadRandomImages() {
+        try {
+            const response = await fetch(`/api/images/random?count=10&page=${page}`);
+            const imageUrls = await response.json();
+            displayImages(imageUrls, false);
+            page++;
+        } catch (error) {
+            console.error('Error loading more images:', error);
+        }
+    }
+
+    async function loadImagesByLabel(label) {
+        try {
+            loadingImagesByLabel = true;
+            const response = await fetch(`/api/images/search?label=${encodeURIComponent(label)}`);
+            const imageUrls = await response.json();
+            displayImages(imageUrls, true);
+        } catch (error) {
+            console.error('Error searching images:', error);
+        } finally {
+            loadingImagesByLabel = false;
+        }
+    }
+
+    window.addEventListener('scroll', () => {
+        if (!loadingImagesByLabel && window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+            loadRandomImages();
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchTopLabels();
+        loadRandomImages();
+    });
+
+    async function searchImages(event) {
+        if (event) event.preventDefault();
+        const labelInput = document.getElementById('labelInput').value;
+        await loadImagesByLabel(labelInput);
+    }
+
+    function handleFileUpload(files) {
+        const formData = new FormData();
+        formData.append('file', files[0]);
+
+        fetch('/api/images/upload', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error uploading image');
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log('Image uploaded successfully:', data);
+                showUploadNotification('Image uploaded successfully', 'success');
+            })
+            .catch(error => {
+                console.error('Error uploading image:', error);
+                showUploadNotification('Failed to upload image.', 'error');
+            });
+    }
+
+    function displayImages(imageUrls, clear) {
+        const resultContainer = document.getElementById('resultContainer');
+        if (clear) {
+            resultContainer.innerHTML = '';
+        }
+
+        if (imageUrls.length === 0) {
+            const noImagesMessage = document.createElement('p');
+            noImagesMessage.textContent = 'No images found for the given label.';
+            resultContainer.appendChild(noImagesMessage);
+            noImagesMessage.style.color = '#2a2a2a';
+            noImagesMessage.style.marginTop = '10px';
+        } else {
+            imageUrls.forEach(url => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.dataset.toggle = 'modal';
+                a.dataset.target = '#imageModal';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Image';
+                img.classList.add('img-fluid');
+                a.appendChild(img);
+                const col = document.createElement('div');
+                col.classList.add('col-md-3', 'pl-0');
+                col.appendChild(a);
+                resultContainer.appendChild(col);
+
+                a.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    $('#modalImage').attr('src', url);
+                    $('#downloadLink').attr('href', url);
+                });
+            });
+        }
+    }
+
+    function showUploadNotification(message, type) {
+        const notification = document.getElementById('uploadNotification');
+        const toastBody = notification.querySelector('.toast-body');
+        toastBody.textContent = message;
+
+        notification.classList.remove('bg-success', 'bg-danger');
+        if (type === 'success') {
+            notification.classList.add('bg-success');
+        } else if (type === 'error') {
+            notification.classList.add('bg-danger');
+        }
+
+        const toast = new bootstrap.Toast(notification);
+        toast.show();
+    }
+
+    async function fetchTopLabels() {
+        try {
+            const params = new URLSearchParams('limit=44');
+            const response = await fetch(`/api/labels/top?${params.toString()}`);
+            const labels = await response.json();
+            const labelCloud = document.getElementById('labelCloud');
+            labelCloud.innerHTML = '';
+
+            const allLabel = document.createElement('span');
+            allLabel.className = 'btn btn-dark';
+            allLabel.innerText = 'Show all';
+            allLabel.href = '/api';
+            allLabel.addEventListener('click', function (event) {
+                event.preventDefault();
+                document.getElementById('labelInput').value = '';
+                loadRandomImages();
+            });
+            labelCloud.appendChild(allLabel);
+            labels.forEach(label => {
+                const span = document.createElement('span');
+                span.className = 'btn btn-outline-dark';
+                span.innerText = label;
+                span.onclick = function () {
+                    document.getElementById('labelInput').value = label;
+                    searchImages();
+                };
+                labelCloud.appendChild(span);
+            });
+        } catch (error) {
+            console.error('Error fetching top labels:', error);
+        }
+    }
+</script>
+</body>
+</html>
