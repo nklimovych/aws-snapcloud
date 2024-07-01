@@ -120,13 +120,6 @@
     </section>
 
     <section>
-        <div id="uploadNotification" class="toast align-items-center text-white bg-success"
-             role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000"
-             style="position: fixed; bottom: 10px; right: 10px; z-index: 1050;">
-            <div class="toast-body">
-                File uploaded successfully
-            </div>
-        </div>
         <div id="resultContainer" class="image-container rounded"></div>
     </section>
 </div>
@@ -147,6 +140,13 @@
                 <img id="modalImage" src="" class="img-fluid" alt="Image">
             </div>
         </div>
+    </div>
+</div>
+<div id="uploadNotification" class="toast align-items-center text-white bg-success"
+     role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000"
+     style="position: fixed; bottom: 10px; right: 10px; z-index: 1050;">
+    <div class="toast-body">
+        File uploaded successfully
     </div>
 </div>
 
@@ -210,13 +210,17 @@
         const formData = new FormData();
         formData.append('file', files[0]);
 
+        if (files.length === 0) {
+            return;
+        }
+
         fetch('/api/images/upload', {
             method: 'POST',
             body: formData
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Error uploading image');
+                    throw new Error('Failed to upload image');
                 }
                 return response.text();
             })
@@ -226,7 +230,7 @@
             })
             .catch(error => {
                 console.error('Error uploading image:', error);
-                showUploadNotification('Failed to upload image.', 'error');
+                showUploadNotification('Failed to upload image', 'error');
             });
     }
 
@@ -268,47 +272,44 @@
     }
 
     function showUploadNotification(message, type) {
-        const notification = document.getElementById('uploadNotification');
-        const toastBody = notification.querySelector('.toast-body');
-        toastBody.textContent = message;
-
-        notification.classList.remove('bg-success', 'bg-danger');
+        const uploadNotification = $('#uploadNotification');
+        uploadNotification.removeClass('bg-success bg-danger');
         if (type === 'success') {
-            notification.classList.add('bg-success');
+            uploadNotification.addClass('bg-success');
         } else if (type === 'error') {
-            notification.classList.add('bg-danger');
+            uploadNotification.addClass('bg-danger');
         }
-
-        const toast = new bootstrap.Toast(notification);
-        toast.show();
+        uploadNotification.find('.toast-body').text(message);
+        if (uploadNotification.hasClass('show')) {
+            uploadNotification.toast('hide');
+        }
+        uploadNotification.toast('show');
     }
 
     async function fetchTopLabels() {
         try {
-            const params = new URLSearchParams('limit=44');
-            const response = await fetch(`/api/labels/top?${params.toString()}`);
+            const response = await fetch('/api/labels/top?limit=35');
             const labels = await response.json();
             const labelCloud = document.getElementById('labelCloud');
             labelCloud.innerHTML = '';
 
-            const allLabel = document.createElement('span');
-            allLabel.className = 'btn btn-dark';
-            allLabel.innerText = 'Show all';
-            allLabel.href = '/api';
-            allLabel.addEventListener('click', function (event) {
-                event.preventDefault();
+            const showAllSpan = document.createElement('span');
+            showAllSpan.textContent = 'Show all';
+            showAllSpan.classList.add('btn', 'btn-dark');
+            showAllSpan.addEventListener('click', () => {
                 document.getElementById('labelInput').value = '';
                 loadRandomImages();
             });
-            labelCloud.appendChild(allLabel);
+            labelCloud.appendChild(showAllSpan);
+
             labels.forEach(label => {
                 const span = document.createElement('span');
-                span.className = 'btn btn-outline-dark';
-                span.innerText = label;
-                span.onclick = function () {
+                span.textContent = label;
+                span.classList.add('btn', 'btn-outline-dark');
+                span.addEventListener('click', () => {
                     document.getElementById('labelInput').value = label;
                     searchImages();
-                };
+                });
                 labelCloud.appendChild(span);
             });
         } catch (error) {
