@@ -31,14 +31,6 @@ scenes, and activities in images.
 - **MySQL**: Relational database management system.
 - **MapStruct**: Code generator for mapping between Java bean types.
 
-[//]: # (- **JUnit**: Testing framework for Java applications.)
-
-[//]: # (- **Mockito**: Mocking framework for unit tests in Java.)
-
-[//]: # (- **Docker**: Platform for containerizing applications.)
-
-[//]: # (- **Testcontainers**: Library for integration testing with Docker containers.)
-
 ## AWS Setup Instructions
 
 Follow these steps to configure AWS S3 bucket and AWS Rekognition:
@@ -48,7 +40,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
 #### Step-by-step Guide:
 
 1. **Log in to AWS Management Console:**
-    - Navigate to [AWS Management Console](https://aws.amazon.com/console/) and log in with your credentials.
+    - Navigate to [AWS Management Console](https://aws.amazon.com/console/) and log in with your 
+   credentials.
 
 2. **Navigate to S3 Service:**
     - In the AWS Management Console, find and select the **S3** service.
@@ -61,7 +54,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
     - Click **Create bucket**.
 
 4. **Note down Bucket Name and Region:**
-    - After successfully creating the bucket, note down the **Bucket Name** and **Region**. You'll need these for your application configuration.
+    - After successfully creating the bucket, note down the **Bucket Name** and **Region**. 
+   You'll need these for your application configuration.
 
 ### 2. Generate IAM User Credentials:
 
@@ -72,19 +66,23 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
 
 2. **Create or Use an Existing IAM User:**
     - Click on **Users** in the left navigation pane.
-    - Either create a new IAM user or select an existing IAM user that you want to use for accessing AWS services (S3 and Rekognition).
+    - Either create a new IAM user or select an existing IAM user that you want to use for 
+   accessing AWS services (S3 and Rekognition).
 
 3. **Add Permissions:**
     - Click on the IAM user to open its details.
     - Navigate to the **Permissions** tab.
-    - Click **Add permissions** and choose the policies that grant access to S3 and Rekognition services. Example policies include:
+    - Click **Add permissions** and choose the policies that grant access to S3 and Rekognition 
+   services. Example policies include:
         - `AmazonS3FullAccess`: Provides full access to Amazon S3 resources.
         - `AmazonRekognitionFullAccess`: Provides full access to Amazon Rekognition.
 
 4. **Generate Access Key ID and Secret Access Key:**
     - In the IAM user details, navigate to the **Security credentials** tab.
-    - Click **Create access key** if no keys exist, or **Generate new access key** if you need to create new keys.
-    - Note down the **Access Key ID** and **Secret Access Key**. These credentials are used by your application to authenticate AWS API requests.
+    - Click **Create access key** if no keys exist, or **Generate new access key** if you need 
+   to create new keys.
+    - Note down the **Access Key ID** and **Secret Access Key**. These credentials are used by 
+   your application to authenticate AWS API requests.
 
 > [!IMPORTANT]
 > Note that the region for Rekognition must match the region for your S3 bucket.
