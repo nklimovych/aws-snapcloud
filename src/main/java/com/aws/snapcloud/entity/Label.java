@@ -19,10 +19,10 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "images")
+@EqualsAndHashCode(exclude = "images")
 @Table(name = "labels")
 public class Label {
     @Id

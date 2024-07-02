@@ -67,23 +67,20 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public List<String> getRandomImageUrls() {
         List<String> randomUrls = new ArrayList<>();
-        List<Image> images = imageRepository.findAll();
-        int count = INITIATE_IMAGE_COUNT;
+        List<String> imageUrls = imageRepository.findAllImageUrls();
 
-        if (images.size() <= count) {
-            return images.stream()
-                         .map(Image::getUrl)
-                         .toList();
+        if (imageUrls.size() <= INITIATE_IMAGE_COUNT) {
+            return imageUrls;
         }
 
         Random random = new Random();
         Set<Integer> indexes = new HashSet<>();
-        while (indexes.size() < count) {
-            indexes.add(random.nextInt(images.size()));
+        while (indexes.size() < INITIATE_IMAGE_COUNT) {
+            indexes.add(random.nextInt(imageUrls.size()));
         }
 
         for (Integer index : indexes) {
-            randomUrls.add(images.get(index).getUrl());
+            randomUrls.add(imageUrls.get(index));
         }
 
         return randomUrls;
