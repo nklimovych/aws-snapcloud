@@ -12,4 +12,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     List<Image> findByLabelName(@Param("labelName") String labelName);
 
     boolean existsByName(String name);
+
+    @Query("SELECT i.url FROM Image i")
+    List<String> findAllImageUrls();
 }
