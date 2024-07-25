@@ -1,8 +1,7 @@
 package com.aws.snapcloud.service;
 
-import com.aws.snapcloud.entity.Label;
-import java.util.Set;
+import java.util.List;
 
 public interface RekognitionService {
-    Set<Label> detectLabels(String key);
+    List<String> detectLabels(String key);
 }

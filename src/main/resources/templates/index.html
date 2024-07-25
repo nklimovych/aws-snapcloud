@@ -74,7 +74,7 @@
             font-weight: 400;
         }
 
-        .label-cloud {
+        .tag-cloud {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
@@ -83,7 +83,7 @@
             overflow: hidden;
         }
 
-        .label-cloud span {
+        .tag-cloud span {
             margin: 5px;
             padding: 5px 10px;
             border-radius: 10px;
@@ -104,13 +104,13 @@
         </div>
     </header>
 
-    <section class="label-cloud" id="labelCloud"></section>
+    <section class="tag-cloud" id="labelCloud"></section>
 
     <section class="search">
         <form id="searchForm" onsubmit="searchImages(event)"
               class="d-flex align-items-center flex-grow-1">
             <input type="text" class="form-control flex-grow-1 mr-2" id="labelInput"
-                   placeholder="Enter your own label" required>
+                   placeholder="Enter your own tag" required>
             <button class="btn btn-outline-dark" type="submit">Search</button>
         </form>
         <label for="fileInput" class="upload-btn btn btn-outline-dark ml-2">Upload
@@ -118,6 +118,7 @@
                    onchange="handleFileUpload(this.files)">
         </label>
     </section>
+
 
     <section>
         <div id="resultContainer" class="image-container rounded"></div>
@@ -132,7 +133,7 @@
                 <h5 class="modal-title">
                     <a id="downloadLink" href="" download>Download</a>
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-tag="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -242,7 +243,7 @@
 
         if (imageUrls.length === 0) {
             const noImagesMessage = document.createElement('p');
-            noImagesMessage.textContent = 'No images found for the given label.';
+            noImagesMessage.textContent = 'No images found for the given tag.';
             resultContainer.appendChild(noImagesMessage);
             noImagesMessage.style.color = '#2a2a2a';
             noImagesMessage.style.marginTop = '10px';
@@ -289,7 +290,7 @@
     async function fetchTopLabels() {
         try {
             const response = await fetch('/api/labels/top?limit=35');
-            const labels = await response.json();
+            const tags = await response.json();
             const labelCloud = document.getElementById('labelCloud');
             labelCloud.innerHTML = '';
 
@@ -302,18 +303,18 @@
             });
             labelCloud.appendChild(showAllSpan);
 
-            labels.forEach(label => {
+            tags.forEach(tag => {
                 const span = document.createElement('span');
-                span.textContent = label;
+                span.textContent = tag;
                 span.classList.add('btn', 'btn-outline-dark');
                 span.addEventListener('click', () => {
-                    document.getElementById('labelInput').value = label;
+                    document.getElementById('labelInput').value = tag;
                     searchImages();
                 });
                 labelCloud.appendChild(span);
             });
         } catch (error) {
-            console.error('Error fetching top labels:', error);
+            console.error('Error fetching top tags:', error);
         }
     }
 </script>

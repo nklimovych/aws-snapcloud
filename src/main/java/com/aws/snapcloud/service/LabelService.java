@@ -1,12 +1,11 @@
 package com.aws.snapcloud.service;
 
-import com.aws.snapcloud.entity.Label;
 import java.util.List;
+import java.util.Set;
+import software.amazon.awssdk.services.rekognition.model.Label;
 
 public interface LabelService {
     List<String> findTopLabels(int limit);
 
-    List<Label> saveAll(List<Label> labels);
-
-    List<Label> findAll();
+    List<String> saveLabels(Set<Label> labelNames, String key);
 }

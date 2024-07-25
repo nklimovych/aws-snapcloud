@@ -6,14 +6,14 @@
 
 **SnapCloud** is a web application designed to streamline image management using AWS S3 and 
 Rekognition services. It enables users to upload, store, and share images, as well as search 
-for images based on detected labels.
+for images based on detected tags.
 
 ### Features:
 
 - **Upload Images**: Upload images to cloud with a simple interface.
-- **Label Cloud**: Visualize the most common labels associated with uploaded images in a tag cloud 
+- **Label Cloud**: Visualize the most common tags associated with uploaded images in a tag cloud 
 format.
-- **Search by custom label**: Search for images by entering custom labels in the search bar.
+- **Search by custom tag**: Search for images by entering custom tags in the search bar.
 - **Image Downloading**: Click on any image to open a modal preview with options to download the 
 image.
 
@@ -153,7 +153,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
      "name": "image-name.jpg",
      "uploadedAt": "2024-07-01T12:59:28.280848",
      "url": "https://your-bucket.s3.region.amazonaws.com/image-name.jpg",
-     "labels": [
+     "tags": [
        "Nature",
        "Water",
        "Turtle",
@@ -174,7 +174,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
    }
    ```
   
-* 🏷️ Search images by label: `GET /api/images/search?label=your-label`
+* 🏷️ Search images by tag: `GET /api/images/search?tag=your-tag`
     ```json
    [
      "https://your-bucket.s3.region.amazonaws.com/image1-name.jpg",
@@ -193,7 +193,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
      ]
    ```
 
-* 🔥 Retrieve top labels: `GET /api/labels/top?limit=your-amount`
+* 🔥 Retrieve top tags: `GET /api/tags/top?limit=your-amount`
   ```json
     [
     "Animal",
