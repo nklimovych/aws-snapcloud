@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,10 +23,8 @@ import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectTaggingRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.Tag;
-import software.amazon.awssdk.services.s3.model.Tagging;
 
 @Service
 @RequiredArgsConstructor
@@ -55,15 +52,15 @@ public class ImageServiceImpl implements ImageService {
                                                              .key(name)
                                                              .build();
             s3Client.putObject(objectRequest, body);
-            rekognitionService.detectLabels(name);
-
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload image: " + name, e);
         }
 
+        Set<String> labels = rekognitionService.detectLabels(name);
         return ImageResponseDto.builder()
                                .name(name)
                                .url(getUrl(name))
+                               .tags(labels)
                                .build();
     }
 
@@ -84,24 +81,26 @@ public class ImageServiceImpl implements ImageService {
                     GetObjectTaggingResponse taggingResponse = getObjectTags(key);
                     List<Tag> tags = taggingResponse.tagSet();
                     boolean hasLabel = tags.stream()
-                                           .anyMatch(tag -> tag.key().startsWith("label-") && label.equals(tag.value()));
+                                           .anyMatch(tag -> tag.key().startsWith("label-")
+                                                   && label.equals(tag.value()));
                     if (hasLabel) {
                         matchingUrls.add(getUrl(key));
                     }
                 } catch (Exception e) {
                     // Handle or log exception if needed
-                    System.err.println("Failed to get tags for key: " + key + " due to: " + e.getMessage());
+                    System.err.println(
+                            "Failed to get tags for key: " + key + " due to: " + e.getMessage());
                 }
             }
 
             listObjectsRequest = listObjectsRequest.toBuilder()
-                                                   .continuationToken(listObjectsResponse.nextContinuationToken())
+                                                   .continuationToken(
+                                                       listObjectsResponse.nextContinuationToken())
                                                    .build();
         } while (listObjectsResponse.isTruncated());
 
         return matchingUrls;
     }
-
 
     @Override
     public List<String> getRandomImageUrls() {

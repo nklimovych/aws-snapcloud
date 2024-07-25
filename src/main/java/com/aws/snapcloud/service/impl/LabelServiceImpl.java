@@ -29,7 +29,7 @@ public class LabelServiceImpl implements LabelService {
     private String bucketName;
 
     @Override
-    public List<String> saveLabels(Set<Label> labels, String key) {
+    public Set<String> saveLabels(Set<Label> labels, String key) {
         List<Tag> tagList = labels.stream()
                                   .map(label -> Tag.builder()
                                                    .key("label-" + label.name().hashCode())
@@ -49,7 +49,7 @@ public class LabelServiceImpl implements LabelService {
 
         return tagList.stream()
                       .map(Tag::value)
-                      .collect(Collectors.toList());
+                      .collect(Collectors.toSet());
     }
 
     @Override
@@ -96,7 +96,6 @@ public class LabelServiceImpl implements LabelService {
 
         return labelCounts;
     }
-
 
     private GetObjectTaggingResponse getObjectTags(String key) {
         return s3Client.getObjectTagging(GetObjectTaggingRequest.builder()

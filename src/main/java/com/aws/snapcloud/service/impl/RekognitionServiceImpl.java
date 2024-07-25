@@ -3,7 +3,7 @@ package com.aws.snapcloud.service.impl;
 import com.aws.snapcloud.service.LabelService;
 import com.aws.snapcloud.service.RekognitionService;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class RekognitionServiceImpl implements RekognitionService {
     private String bucketName;
 
     @Override
-    public List<String> detectLabels(String key) {
+    public Set<String> detectLabels(String key) {
         DetectLabelsRequest request = DetectLabelsRequest.builder()
                                                          .image(getImage(key))
                                                          .minConfidence(70F)
