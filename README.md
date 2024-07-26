@@ -4,32 +4,27 @@
 
 # 🚀 Hi there!
 
-**SnapCloud** is a web application designed to streamline image management using AWS S3 and 
-Rekognition services. It enables users to upload, store, and share images, as well as search 
+**SnapCloud** is a web application designed to streamline image management using AWS S3 and
+Rekognition services. It enables users to upload, store, and share images, as well as search
 for images based on detected labels.
 
 ### Features:
 
 - **Upload Images**: Upload images to cloud with a simple interface.
-- **Label Cloud**: Visualize the most common labels associated with uploaded images in a tag cloud 
-format.
+- **Label Cloud**: Visualize the most common labels associated with uploaded images in a tag cloud
+  format.
 - **Search by custom label**: Search for images by entering custom labels in the search bar.
-- **Image Downloading**: Click on any image to open a modal preview with options to download the 
-image.
+- **Image Downloading**: Click on any image to open a modal preview with options to download the
+  image.
 
 ### Tech Stack
 
 - **Spring Boot**: Framework for crafting Java-based web applications.
-- **Spring Data JPA**: Simplifies database access and persistence with Spring applications.
 - **Spring Web**: Framework for building web applications with Spring MVC.
 - **Maven**: Build automation tool for managing dependencies and builds.
 - **AWS S3**: Scalable storage for images and objects in the cloud.
-- **AWS Rekognition**: Deep learning-based image analysis service for identifying objects, text, 
-scenes, and activities in images.
-- **Hibernate**: ORM (Object-Relational Mapping) tool for data persistence in Java applications.
-- **Liquibase**: Database schema management for Java applications.
-- **MySQL**: Relational database management system.
-- **MapStruct**: Code generator for mapping between Java bean types.
+- **AWS Rekognition**: Deep learning-based image analysis service for identifying objects, text,
+  scenes, and activities in images.
 - **JUnit**: Testing framework for Java applications.
 - **Mockito**: Mocking framework for unit tests in Java.
 - **Docker**: Platform for containerizing applications.
@@ -44,8 +39,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
 #### Step-by-step Guide:
 
 1. **Log in to AWS Management Console:**
-    - Navigate to [AWS Management Console](https://aws.amazon.com/console/) and log in with your 
-   credentials.
+    - Navigate to [AWS Management Console](https://aws.amazon.com/console/) and log in with your
+      credentials.
 
 2. **Navigate to S3 Service:**
     - In the AWS Management Console, find and select the **S3** service.
@@ -58,8 +53,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
     - Click **Create bucket**.
 
 4. **Note down Bucket Name and Region:**
-    - After successfully creating the bucket, note down the **Bucket Name** and **Region**. 
-   You'll need these for your application configuration.
+    - After successfully creating the bucket, note down the **Bucket Name** and **Region**.
+      You'll need these for your application configuration.
 
 ### 2. Generate IAM User Credentials:
 
@@ -70,26 +65,26 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
 
 2. **Create or Use an Existing IAM User:**
     - Click on **Users** in the left navigation pane.
-    - Either create a new IAM user or select an existing IAM user that you want to use for 
-   accessing AWS services (S3 and Rekognition).
+    - Either create a new IAM user or select an existing IAM user that you want to use for
+      accessing AWS services (S3 and Rekognition).
 
 3. **Add Permissions:**
     - Click on the IAM user to open its details.
     - Navigate to the **Permissions** tab.
-    - Click **Add permissions** and choose the policies that grant access to S3 and Rekognition 
-   services. Example policies include:
+    - Click **Add permissions** and choose the policies that grant access to S3 and Rekognition
+      services. Example policies include:
         - `AmazonS3FullAccess`: Provides full access to Amazon S3 resources.
         - `AmazonRekognitionFullAccess`: Provides full access to Amazon Rekognition.
 
 4. **Generate Access Key ID and Secret Access Key:**
     - In the IAM user details, navigate to the **Security credentials** tab.
-    - Click **Create access key** if no keys exist, or **Generate new access key** if you need 
-   to create new keys.
-    - Note down the **Access Key ID** and **Secret Access Key**. These credentials are used by 
-   your application to authenticate AWS API requests.
+    - Click **Create access key** if no keys exist, or **Generate new access key** if you need
+      to create new keys.
+    - Note down the **Access Key ID** and **Secret Access Key**. These credentials are used by
+      your application to authenticate AWS API requests.
 
-> [!IMPORTANT]
-> Note that the region for Rekognition must match the region for your S3 bucket.
+    > [!IMPORTANT]
+    > Note that the region for Rekognition must match the region for your S3 bucket.
 
 ## Installation
 
@@ -103,23 +98,17 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
    Set up an `application.propperties`, populate it with the following environment variables:
     ```properties
     spring.application.name=snapcloud
-
+    
     aws.bucket.name=${AWS_BUCKET_NAME}
     aws.bucket.region=${AWS_BUCKET_REGION}
     aws.access.key=${AWS_ACCESS_KEY}
     aws.secret.key=${AWS_SECRET_KEY}
-
-    spring.datasource.url=${DB_URL}
-    spring.datasource.username=${DB_USERNAME}
-    spring.datasource.password=${DB_PASSWORD}
-    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-
-    spring.jpa.hibernate.ddl-auto=validate
-    spring.jpa.show-sql=true
-    spring.jpa.open-in-view=false
-
+    
     server.servlet.context-path=/
     ```
+    > [!IMPORTANT]
+    > Remember to add your environment variables along with your credentials.
+
 3. Build and Run the Docker Containers:
 
    ```bash
@@ -141,7 +130,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
 
 * 🚀 Upload an image: `POST /api/images/upload`
 
-   Request Body:
+  Request Body:
    ```json
     {
       "file": "image-file.jpg"
@@ -163,7 +152,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
    }
   ```
 
-   Response (Error):
+  Response (Error):
    ```json
    {
      "time": "2024-07-01T12:56:46.719761",
@@ -173,7 +162,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
      ]
    }
    ```
-  
+
 * 🏷️ Search images by label: `GET /api/images/search?label=your-label`
     ```json
    [
@@ -182,8 +171,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
      "https://your-bucket.s3.region.amazonaws.com/image3-name.jpg"
    ]
     ```
-  
-* 👀 Retrieve random images: `GET /api/images/random`
+
+* 👀 Retrieve all images: `GET /api/images/all`
    ```json
     [
      "https://your-bucket.s3.region.amazonaws.com/image1-name.jpg",
@@ -216,7 +205,7 @@ Solution: Dedicated time for research and hands-on experimentation.
 
 Steps:
 
-- Explored AWS documentation for latest features in S3 and Rekognition.
+- Explore AWS documentation for the latest features in S3 and Rekognition.
 - Implemented prototypes to understand integration points with existing application.
 - Tested new features in a sandbox environment before production deployment.
 
@@ -228,7 +217,7 @@ Solution: Agile project management and efficient task prioritization. And OVERTI
 
 Steps:
 
-- Utilized Agile methodologies to break down tasks into manageable sprints.
+- Used Agile methodologies to break down tasks into manageable sprints.
 - Set clear goals and milestones for each sprint.
 - Prioritized tasks based on impact and dependencies to meet deadlines effectively.
 

@@ -9,6 +9,5 @@ public interface ImageService {
 
     List<String> searchByLabel(String label);
 
-    List<String> getRandomImageUrls();
-
+    List<String> getAllImageUrls();
 }

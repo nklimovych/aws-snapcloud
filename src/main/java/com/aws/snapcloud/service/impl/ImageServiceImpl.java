@@ -1,36 +1,34 @@
 package com.aws.snapcloud.service.impl;
 
 import com.aws.snapcloud.dto.ImageResponseDto;
-import com.aws.snapcloud.entity.Image;
 import com.aws.snapcloud.exception.DuplicateEntityException;
-import com.aws.snapcloud.mapper.ImageMapper;
-import com.aws.snapcloud.repository.ImageRepository;
 import com.aws.snapcloud.service.ImageService;
 import com.aws.snapcloud.service.RekognitionService;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectTaggingRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectTaggingResponse;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.Tag;
 
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
-    private static final int INITIATE_IMAGE_COUNT = 38;
-
     private final RekognitionService rekognitionService;
-    private final ImageRepository imageRepository;
-    private final ImageMapper imageMapper;
     private final S3Client s3Client;
 
     @Value("${aws.bucket.name}")
@@ -40,7 +38,7 @@ public class ImageServiceImpl implements ImageService {
     public ImageResponseDto upload(MultipartFile file) {
         String name = file.getOriginalFilename();
 
-        if (imageRepository.existsByName(name)) {
+        if (doesObjectExist(name)) {
             throw new DuplicateEntityException("Image with the same name already exists: " + name);
         }
 
@@ -54,44 +52,80 @@ public class ImageServiceImpl implements ImageService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload image: " + name, e);
         }
-        return imageMapper.toResponseDto(save(name));
+
+        Set<String> labels = rekognitionService.detectLabels(name);
+        return ImageResponseDto.builder()
+                               .name(name)
+                               .url(getUrl(name))
+                               .tags(labels)
+                               .build();
     }
 
     @Override
     public List<String> searchByLabel(String label) {
-        return imageRepository.findByLabelName(label).stream()
-                              .map(Image::getUrl)
-                              .toList();
+        List<String> matchUrls = new ArrayList<>();
+        ListObjectsV2Request listObjectsRequest = ListObjectsV2Request.builder()
+                                                                      .bucket(bucketName)
+                                                                      .build();
+        ListObjectsV2Response listObjectsResponse;
+        do {
+            listObjectsResponse = s3Client.listObjectsV2(listObjectsRequest);
+
+            List<S3Object> s3Objects = listObjectsResponse.contents();
+            for (S3Object s3Object : s3Objects) {
+                String key = s3Object.key();
+
+                GetObjectTaggingResponse taggingResponse = getObjectTags(key);
+                List<Tag> tags = taggingResponse.tagSet();
+                boolean hasLabel = tags.stream()
+                           .anyMatch(tag -> tag.key().startsWith("label-")
+                                    && tag.value().matches(
+                                       "(?i).*\\b" + Pattern.quote(label) + "\\b.*"));
+                if (hasLabel) {
+                    matchUrls.add(getUrl(key));
+                }
+            }
+
+            listObjectsRequest = listObjectsRequest.toBuilder()
+                                                   .continuationToken(
+                                                       listObjectsResponse.nextContinuationToken())
+                                                   .build();
+        } while (listObjectsResponse.isTruncated());
+
+        return matchUrls;
+    }
+
+    private boolean doesObjectExist(String key) {
+        try {
+            s3Client.headObject(builder -> builder.bucket(bucketName).key(key));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
-    public List<String> getRandomImageUrls() {
-        List<String> randomUrls = new ArrayList<>();
-        List<String> imageUrls = imageRepository.findAllImageUrls();
+    public List<String> getAllImageUrls() {
+        List<String> urls = new ArrayList<>();
+        ListObjectsV2Request listObjectsRequest = ListObjectsV2Request.builder()
+                                                                      .bucket(bucketName)
+                                                                      .build();
+        ListObjectsV2Response listObjectsResponse;
+        do {
+            listObjectsResponse = s3Client.listObjectsV2(listObjectsRequest);
 
-        if (imageUrls.size() <= INITIATE_IMAGE_COUNT) {
-            return imageUrls;
-        }
+            List<S3Object> s3Objects = listObjectsResponse.contents();
+            for (S3Object s3Object : s3Objects) {
+                urls.add(getUrl(s3Object.key()));
+            }
 
-        Random random = new Random();
-        Set<Integer> indexes = new HashSet<>();
-        while (indexes.size() < INITIATE_IMAGE_COUNT) {
-            indexes.add(random.nextInt(imageUrls.size()));
-        }
+            listObjectsRequest = listObjectsRequest.toBuilder()
+                                                   .continuationToken(
+                                                       listObjectsResponse.nextContinuationToken())
+                                                   .build();
+        } while (listObjectsResponse.isTruncated());
 
-        for (Integer index : indexes) {
-            randomUrls.add(imageUrls.get(index));
-        }
-
-        return randomUrls;
-    }
-
-    private Image save(String fileName) {
-        Image image = new Image();
-        image.setName(fileName);
-        image.setUrl(getUrl(fileName));
-        image.setLabels(rekognitionService.detectLabels(fileName));
-        return imageRepository.save(image);
+        return urls;
     }
 
     private String getUrl(String key) {
@@ -100,5 +134,12 @@ public class ImageServiceImpl implements ImageService {
                                                            .key(key)
                                                            .build());
         return url.toString();
+    }
+
+    private GetObjectTaggingResponse getObjectTags(String key) {
+        return s3Client.getObjectTagging(GetObjectTaggingRequest.builder()
+                                                                .bucket(bucketName)
+                                                                .key(key)
+                                                                .build());
     }
 }
