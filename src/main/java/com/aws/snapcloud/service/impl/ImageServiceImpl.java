@@ -7,10 +7,9 @@ import com.aws.snapcloud.service.RekognitionService;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,8 +28,6 @@ import software.amazon.awssdk.services.s3.model.Tag;
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
-    private static final int INITIATE_IMAGE_COUNT = 38;
-
     private final RekognitionService rekognitionService;
     private final S3Client s3Client;
 
@@ -66,7 +63,7 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public List<String> searchByLabel(String label) {
-        List<String> matchingUrls = new ArrayList<>();
+        List<String> matchUrls = new ArrayList<>();
         ListObjectsV2Request listObjectsRequest = ListObjectsV2Request.builder()
                                                                       .bucket(bucketName)
                                                                       .build();
@@ -77,19 +74,15 @@ public class ImageServiceImpl implements ImageService {
             List<S3Object> s3Objects = listObjectsResponse.contents();
             for (S3Object s3Object : s3Objects) {
                 String key = s3Object.key();
-                try {
-                    GetObjectTaggingResponse taggingResponse = getObjectTags(key);
-                    List<Tag> tags = taggingResponse.tagSet();
-                    boolean hasLabel = tags.stream()
-                                           .anyMatch(tag -> tag.key().startsWith("label-")
-                                                   && label.equals(tag.value()));
-                    if (hasLabel) {
-                        matchingUrls.add(getUrl(key));
-                    }
-                } catch (Exception e) {
-                    // Handle or log exception if needed
-                    System.err.println(
-                            "Failed to get tags for key: " + key + " due to: " + e.getMessage());
+
+                GetObjectTaggingResponse taggingResponse = getObjectTags(key);
+                List<Tag> tags = taggingResponse.tagSet();
+                boolean hasLabel = tags.stream()
+                           .anyMatch(tag -> tag.key().startsWith("label-")
+                                    && tag.value().matches(
+                                       "(?i).*\\b" + Pattern.quote(label) + "\\b.*"));
+                if (hasLabel) {
+                    matchUrls.add(getUrl(key));
                 }
             }
 
@@ -99,29 +92,7 @@ public class ImageServiceImpl implements ImageService {
                                                    .build();
         } while (listObjectsResponse.isTruncated());
 
-        return matchingUrls;
-    }
-
-    @Override
-    public List<String> getRandomImageUrls() {
-        List<String> randomUrls = new ArrayList<>();
-        List<String> imageUrls = getAllImageUrls();
-
-        if (imageUrls.size() <= INITIATE_IMAGE_COUNT) {
-            return imageUrls;
-        }
-
-        Random random = new Random();
-        Set<Integer> indexes = new HashSet<>();
-        while (indexes.size() < INITIATE_IMAGE_COUNT) {
-            indexes.add(random.nextInt(imageUrls.size()));
-        }
-
-        for (Integer index : indexes) {
-            randomUrls.add(imageUrls.get(index));
-        }
-
-        return randomUrls;
+        return matchUrls;
     }
 
     private boolean doesObjectExist(String key) {
@@ -133,7 +104,8 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
-    private List<String> getAllImageUrls() {
+    @Override
+    public List<String> getAllImageUrls() {
         List<String> urls = new ArrayList<>();
         ListObjectsV2Request listObjectsRequest = ListObjectsV2Request.builder()
                                                                       .bucket(bucketName)

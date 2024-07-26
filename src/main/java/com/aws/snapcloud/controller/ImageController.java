@@ -27,8 +27,8 @@ public class ImageController {
         return imageService.searchByLabel(label);
     }
 
-    @GetMapping("/random")
-    public List<String> getRandomImages() {
-        return imageService.getRandomImageUrls();
+    @GetMapping("/all")
+    public List<String> getAllImages() {
+        return imageService.getAllImageUrls();
     }
 }

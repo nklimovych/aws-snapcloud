@@ -27,7 +27,6 @@ public class RekognitionServiceImpl implements RekognitionService {
     public Set<String> detectLabels(String key) {
         DetectLabelsRequest request = DetectLabelsRequest.builder()
                                                          .image(getImage(key))
-                                                         .minConfidence(70F)
                                                          .maxLabels(10)
                                                          .build();
         DetectLabelsResponse detectedLabels = rekognitionClient.detectLabels(request);

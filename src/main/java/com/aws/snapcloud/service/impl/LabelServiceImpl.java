@@ -16,13 +16,16 @@ import software.amazon.awssdk.services.s3.model.GetObjectTaggingResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PutObjectTaggingRequest;
-import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.Tag;
 import software.amazon.awssdk.services.s3.model.Tagging;
 
 @Service
 @RequiredArgsConstructor
 public class LabelServiceImpl implements LabelService {
+
+    private static final String PREFIX = "label-";
+    private static final long INCREMENT = 1L;
+
     private final S3Client s3Client;
 
     @Value("${aws.bucket.name}")
@@ -30,26 +33,24 @@ public class LabelServiceImpl implements LabelService {
 
     @Override
     public Set<String> saveLabels(Set<Label> labels, String key) {
-        List<Tag> tagList = labels.stream()
-                                  .map(label -> Tag.builder()
-                                                   .key("label-" + label.name().hashCode())
-                                                   .value(label.name())
-                                                   .build())
-                                  .collect(Collectors.toList());
-
-        Tagging tags = Tagging.builder()
-                              .tagSet(tagList)
-                              .build();
+        List<Tag> tags = labels.stream()
+                               .map(label -> Tag.builder()
+                                                .key(PREFIX + label.name().hashCode())
+                                                .value(label.name())
+                                                .build())
+                               .collect(Collectors.toList());
 
         s3Client.putObjectTagging(PutObjectTaggingRequest.builder()
                                                          .bucket(bucketName)
                                                          .key(key)
-                                                         .tagging(tags)
+                                                         .tagging(Tagging.builder()
+                                                                         .tagSet(tags)
+                                                                         .build())
                                                          .build());
 
-        return tagList.stream()
-                      .map(Tag::value)
-                      .collect(Collectors.toSet());
+        return tags.stream()
+                   .map(Tag::value)
+                   .collect(Collectors.toSet());
     }
 
     @Override
@@ -65,42 +66,33 @@ public class LabelServiceImpl implements LabelService {
     private Map<String, Long> countLabelOccurrences() {
         Map<String, Long> labelCounts = new HashMap<>();
 
-        ListObjectsV2Request listObjectsRequest = ListObjectsV2Request.builder()
-                                                                      .bucket(bucketName)
-                                                                      .build();
-        ListObjectsV2Response listObjectsResponse;
+        ListObjectsV2Request request = ListObjectsV2Request.builder()
+                                                           .bucket(bucketName)
+                                                           .build();
+
+        ListObjectsV2Response response;
         do {
-            listObjectsResponse = s3Client.listObjectsV2(listObjectsRequest);
-
-            List<S3Object> s3Objects = listObjectsResponse.contents();
-            for (S3Object s3Object : s3Objects) {
+            response = s3Client.listObjectsV2(request);
+            response.contents().forEach(s3Object -> {
                 String key = s3Object.key();
-                GetObjectTaggingResponse taggingResponse = getObjectTags(key);
+                GetObjectTaggingResponse taggingResponse = s3Client.getObjectTagging(
+                        GetObjectTaggingRequest.builder()
+                                               .bucket(bucketName)
+                                               .key(key)
+                                               .build());
 
-                List<Tag> tags = taggingResponse.tagSet();
-                for (Tag tag : tags) {
-                    if (tag.key().startsWith("label-")) {
-                        labelCounts.put(
-                                tag.value(),
-                                labelCounts.getOrDefault(tag.value(), 0L) + 1
-                        );
+                taggingResponse.tagSet().forEach(tag -> {
+                    if (tag.key().startsWith(PREFIX)) {
+                        labelCounts.merge(tag.value(), INCREMENT, Long::sum);
                     }
-                }
-            }
+                });
+            });
 
-            listObjectsRequest = listObjectsRequest.toBuilder()
-                                               .continuationToken(
-                                                       listObjectsResponse.nextContinuationToken())
-                                               .build();
-        } while (listObjectsResponse.isTruncated());
+            request = request.toBuilder()
+                             .continuationToken(response.nextContinuationToken())
+                             .build();
+        } while (response.isTruncated());
 
         return labelCounts;
-    }
-
-    private GetObjectTaggingResponse getObjectTags(String key) {
-        return s3Client.getObjectTagging(GetObjectTaggingRequest.builder()
-                                                                .bucket(bucketName)
-                                                                .key(key)
-                                                                .build());
     }
 }
