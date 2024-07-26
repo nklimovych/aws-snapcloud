@@ -20,16 +20,11 @@ for images based on detected labels.
 ### Tech Stack
 
 - **Spring Boot**: Framework for crafting Java-based web applications.
-- **Spring Data JPA**: Simplifies database access and persistence with Spring applications.
 - **Spring Web**: Framework for building web applications with Spring MVC.
 - **Maven**: Build automation tool for managing dependencies and builds.
 - **AWS S3**: Scalable storage for images and objects in the cloud.
 - **AWS Rekognition**: Deep learning-based image analysis service for identifying objects, text,
   scenes, and activities in images.
-- **Hibernate**: ORM (Object-Relational Mapping) tool for data persistence in Java applications.
-- **Liquibase**: Database schema management for Java applications.
-- **MySQL**: Relational database management system.
-- **MapStruct**: Code generator for mapping between Java bean types.
 - **JUnit**: Testing framework for Java applications.
 - **Mockito**: Mocking framework for unit tests in Java.
 - **Docker**: Platform for containerizing applications.
@@ -88,8 +83,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
     - Note down the **Access Key ID** and **Secret Access Key**. These credentials are used by
       your application to authenticate AWS API requests.
 
-> [!IMPORTANT]
-> Note that the region for Rekognition must match the region for your S3 bucket.
+    > [!IMPORTANT]
+    > Note that the region for Rekognition must match the region for your S3 bucket.
 
 ## Installation
 
@@ -103,23 +98,17 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
    Set up an `application.propperties`, populate it with the following environment variables:
     ```properties
     spring.application.name=snapcloud
-
+    
     aws.bucket.name=${AWS_BUCKET_NAME}
     aws.bucket.region=${AWS_BUCKET_REGION}
     aws.access.key=${AWS_ACCESS_KEY}
     aws.secret.key=${AWS_SECRET_KEY}
-
-    spring.datasource.url=${DB_URL}
-    spring.datasource.username=${DB_USERNAME}
-    spring.datasource.password=${DB_PASSWORD}
-    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-
-    spring.jpa.hibernate.ddl-auto=validate
-    spring.jpa.show-sql=true
-    spring.jpa.open-in-view=false
-
+    
     server.servlet.context-path=/
     ```
+    > [!IMPORTANT]
+    > Remember to add your environment variables along with your credentials.
+
 3. Build and Run the Docker Containers:
 
    ```bash
@@ -183,7 +172,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
    ]
     ```
 
-* 👀 Retrieve random images: `GET /api/images/random`
+* 👀 Retrieve all images: `GET /api/images/all`
    ```json
     [
      "https://your-bucket.s3.region.amazonaws.com/image1-name.jpg",
@@ -216,7 +205,7 @@ Solution: Dedicated time for research and hands-on experimentation.
 
 Steps:
 
-- Explored AWS documentation for latest features in S3 and Rekognition.
+- Explore AWS documentation for the latest features in S3 and Rekognition.
 - Implemented prototypes to understand integration points with existing application.
 - Tested new features in a sandbox environment before production deployment.
 
@@ -228,7 +217,7 @@ Solution: Agile project management and efficient task prioritization. And OVERTI
 
 Steps:
 
-- Utilized Agile methodologies to break down tasks into manageable sprints.
+- Used Agile methodologies to break down tasks into manageable sprints.
 - Set clear goals and milestones for each sprint.
 - Prioritized tasks based on impact and dependencies to meet deadlines effectively.
 
