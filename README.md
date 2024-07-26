@@ -4,18 +4,18 @@
 
 # 🚀 Hi there!
 
-**SnapCloud** is a web application designed to streamline image management using AWS S3 and 
-Rekognition services. It enables users to upload, store, and share images, as well as search 
-for images based on detected tags.
+**SnapCloud** is a web application designed to streamline image management using AWS S3 and
+Rekognition services. It enables users to upload, store, and share images, as well as search
+for images based on detected labels.
 
 ### Features:
 
 - **Upload Images**: Upload images to cloud with a simple interface.
-- **Label Cloud**: Visualize the most common tags associated with uploaded images in a tag cloud 
-format.
-- **Search by custom tag**: Search for images by entering custom tags in the search bar.
-- **Image Downloading**: Click on any image to open a modal preview with options to download the 
-image.
+- **Label Cloud**: Visualize the most common labels associated with uploaded images in a tag cloud
+  format.
+- **Search by custom label**: Search for images by entering custom labels in the search bar.
+- **Image Downloading**: Click on any image to open a modal preview with options to download the
+  image.
 
 ### Tech Stack
 
@@ -24,8 +24,8 @@ image.
 - **Spring Web**: Framework for building web applications with Spring MVC.
 - **Maven**: Build automation tool for managing dependencies and builds.
 - **AWS S3**: Scalable storage for images and objects in the cloud.
-- **AWS Rekognition**: Deep learning-based image analysis service for identifying objects, text, 
-scenes, and activities in images.
+- **AWS Rekognition**: Deep learning-based image analysis service for identifying objects, text,
+  scenes, and activities in images.
 - **Hibernate**: ORM (Object-Relational Mapping) tool for data persistence in Java applications.
 - **Liquibase**: Database schema management for Java applications.
 - **MySQL**: Relational database management system.
@@ -44,8 +44,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
 #### Step-by-step Guide:
 
 1. **Log in to AWS Management Console:**
-    - Navigate to [AWS Management Console](https://aws.amazon.com/console/) and log in with your 
-   credentials.
+    - Navigate to [AWS Management Console](https://aws.amazon.com/console/) and log in with your
+      credentials.
 
 2. **Navigate to S3 Service:**
     - In the AWS Management Console, find and select the **S3** service.
@@ -58,8 +58,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
     - Click **Create bucket**.
 
 4. **Note down Bucket Name and Region:**
-    - After successfully creating the bucket, note down the **Bucket Name** and **Region**. 
-   You'll need these for your application configuration.
+    - After successfully creating the bucket, note down the **Bucket Name** and **Region**.
+      You'll need these for your application configuration.
 
 ### 2. Generate IAM User Credentials:
 
@@ -70,23 +70,23 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
 
 2. **Create or Use an Existing IAM User:**
     - Click on **Users** in the left navigation pane.
-    - Either create a new IAM user or select an existing IAM user that you want to use for 
-   accessing AWS services (S3 and Rekognition).
+    - Either create a new IAM user or select an existing IAM user that you want to use for
+      accessing AWS services (S3 and Rekognition).
 
 3. **Add Permissions:**
     - Click on the IAM user to open its details.
     - Navigate to the **Permissions** tab.
-    - Click **Add permissions** and choose the policies that grant access to S3 and Rekognition 
-   services. Example policies include:
+    - Click **Add permissions** and choose the policies that grant access to S3 and Rekognition
+      services. Example policies include:
         - `AmazonS3FullAccess`: Provides full access to Amazon S3 resources.
         - `AmazonRekognitionFullAccess`: Provides full access to Amazon Rekognition.
 
 4. **Generate Access Key ID and Secret Access Key:**
     - In the IAM user details, navigate to the **Security credentials** tab.
-    - Click **Create access key** if no keys exist, or **Generate new access key** if you need 
-   to create new keys.
-    - Note down the **Access Key ID** and **Secret Access Key**. These credentials are used by 
-   your application to authenticate AWS API requests.
+    - Click **Create access key** if no keys exist, or **Generate new access key** if you need
+      to create new keys.
+    - Note down the **Access Key ID** and **Secret Access Key**. These credentials are used by
+      your application to authenticate AWS API requests.
 
 > [!IMPORTANT]
 > Note that the region for Rekognition must match the region for your S3 bucket.
@@ -141,7 +141,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
 
 * 🚀 Upload an image: `POST /api/images/upload`
 
-   Request Body:
+  Request Body:
    ```json
     {
       "file": "image-file.jpg"
@@ -153,7 +153,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
      "name": "image-name.jpg",
      "uploadedAt": "2024-07-01T12:59:28.280848",
      "url": "https://your-bucket.s3.region.amazonaws.com/image-name.jpg",
-     "tags": [
+     "labels": [
        "Nature",
        "Water",
        "Turtle",
@@ -163,7 +163,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
    }
   ```
 
-   Response (Error):
+  Response (Error):
    ```json
    {
      "time": "2024-07-01T12:56:46.719761",
@@ -173,8 +173,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
      ]
    }
    ```
-  
-* 🏷️ Search images by tag: `GET /api/images/search?tag=your-tag`
+
+* 🏷️ Search images by label: `GET /api/images/search?label=your-label`
     ```json
    [
      "https://your-bucket.s3.region.amazonaws.com/image1-name.jpg",
@@ -182,7 +182,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
      "https://your-bucket.s3.region.amazonaws.com/image3-name.jpg"
    ]
     ```
-  
+
 * 👀 Retrieve random images: `GET /api/images/random`
    ```json
     [
@@ -193,7 +193,7 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
      ]
    ```
 
-* 🔥 Retrieve top tags: `GET /api/tags/top?limit=your-amount`
+* 🔥 Retrieve top labels: `GET /api/labels/top?limit=your-amount`
   ```json
     [
     "Animal",
