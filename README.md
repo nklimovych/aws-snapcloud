@@ -106,8 +106,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
     
     server.servlet.context-path=/
     ```
-    > [!IMPORTANT]
-    > Remember to add your environment variables along with your credentials.
+> [!IMPORTANT]
+> Remember to add your environment variables along with your credentials.
 
 3. Build and Run the Docker Containers:
 
@@ -140,9 +140,8 @@ Follow these steps to configure AWS S3 bucket and AWS Rekognition:
    ```json
    {
      "name": "image-name.jpg",
-     "uploadedAt": "2024-07-01T12:59:28.280848",
      "url": "https://your-bucket.s3.region.amazonaws.com/image-name.jpg",
-     "labels": [
+     "tags": [
        "Nature",
        "Water",
        "Turtle",
